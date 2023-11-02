@@ -81,6 +81,21 @@ $ serverless deploy
 
 With the current configuration, the DynamoDB table will be removed when running `serverless remove`. To retain it, uncomment `DeletionPolicy: Retain` in serverless.yml.
 
+### Testing
+It is possible to test by using any websocket client. Just connect to the url passing the `playerId` as a query parameter and then start sending messages to other clients. Example url: `wss://{{websocketUrl}}/dev/?playerId=1`
+
+Message: 
+``` JSON
+{
+    "routeKey": "sendmessage",
+    "action": "sendmessage",
+    "message": "Hello, from player 1!",
+    "playerId": "1",
+    "destinationPlayerId": "2"
+}
+```
+
+
 ### Development
 The command `serverless offline` may be useful to test things locally. Lambda triggers however haven't been adapted to run locally, therefore one can send messages to the websocket but would not receive anything from other clients.
 
