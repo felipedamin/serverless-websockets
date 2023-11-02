@@ -1,0 +1,96 @@
+service: aws-serverless-sockets
+frameworkVersion: '3'
+
+custom:
+  socketsTableName: 'sockets-table-${sls:stage}'
+  messagesTableName: 'messages-table-${sls:stage}'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  websocketsApiName: lambda-websockets-api
+  websocketsApiRouteSelectionExpression: $request.body.action #custom routes are selected by the value of the action property in the body
+  websocketsDescription: Serverless Websockets
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            ## used to write on DB
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            ## used to write logs
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            ## used to allow lambda to manage resources related to dynamo streams
+            - dynamodb:DescribeStream
+            - dynamodb:GetRecords
+            - dynamodb:GetShardIterator
+            - dynamodb:ListStreams
+          Resource:
+            - Fn::GetAtt: [ SocketsTable, Arn ]
+            - Fn::GetAtt: [ MessagesTable, Arn ]
+  environment:
+    SOCKETS_TABLE: ${self:custom.socketsTableName}
+    MESSAGES_TABLE: ${self:custom.messagesTableName}
+
+functions:	
+  connectionHandler:
+    handler: src/api/websocket.handler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:	
+          route: $disconnect
+      - websocket:	
+          route: sendmessage
+          routeResponseSelectionExpression: $default
+  postMessageToWebsocket:
+    handler: src/api/postMessageToWebsocket.handler
+    events:
+      - stream:
+          type: dynamodb
+          # batchSize: 1
+          arn:
+            Fn::GetAtt: [ MessagesTable, StreamArn ]
+
+resources:
+  Resources:
+    SocketsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: playerId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: playerId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.socketsTableName}
+        ## deleting DB to save money
+        # DeletionPolicy: Retain
+    MessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: messageId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: messageId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.messagesTableName}
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        ## deleting DB to save money
+        # DeletionPolicy: Retain
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-plugin-offline-dynamodb-stream

@@ -1,0 +1,17 @@
+{
+  "name": "aws-serverless-sockets",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.441.0",
+    "@aws-sdk/client-dynamodb": "^3.438.0",
+    "@aws-sdk/lib-dynamodb": "^3.438.0",
+    "serverless-http": "^3.1.1"
+  },
+  "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-offline": "^13.2.0",
+    "serverless-plugin-offline-dynamodb-stream": "^1.0.20"
+  }
+}
