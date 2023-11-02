@@ -5,7 +5,7 @@ sequenceDiagram
     participant Client2
   end
   box endpoints
-    participant Gateway
+    participant WebsocketGateway
     participant postMessage API
   end
   box dynamoDB tables
@@ -13,24 +13,24 @@ sequenceDiagram
     participant Messages Table
   end
   
-  Client->>Gateway: Connect
-  Gateway->>Websockets Table: Save connection/player information
-  Gateway-->>Client: connection accepted!
+  Client->>WebsocketGateway: Connect
+  WebsocketGateway->>Websockets Table: Save connection/player information
+  WebsocketGateway-->>Client: connection accepted!
   
-  Client2->>Gateway: Connect
-  Gateway->>Websockets Table: Save connection/player information
-  Gateway-->>Client2: connection accepted!
+  Client2->>WebsocketGateway: Connect
+  WebsocketGateway->>Websockets Table: Save connection/player information
+  WebsocketGateway-->>Client2: connection accepted!
 
-  Note over Client,Gateway: Both players connected to websocket API
+  Note over Client,WebsocketGateway: Both players connected to websocket API
 
-  Client->>Gateway: Sends Message
-  Gateway->>Messages Table: Save Message
-  Messages Table-->>Gateway: Message Saved
-  Gateway-->>Client: Message Sent!
+  Client->>WebsocketGateway: Sends Message
+  WebsocketGateway->>Messages Table: Save Message
+  Messages Table-->>WebsocketGateway: Message Saved
+  WebsocketGateway-->>Client: Message Sent!
   Messages Table->>postMessage API: triggers
 
   postMessage API->>Websockets Table: Get data
   Websockets Table-->>postMessage API: connection/player data
-  postMessage API->>Gateway: PostToConnectionCommand()
-  Gateway->>Client2: writes message
+  postMessage API->>WebsocketGateway: PostToConnectionCommand()
+  WebsocketGateway->>Client2: writes message
 ```
