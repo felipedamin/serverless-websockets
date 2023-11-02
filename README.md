@@ -61,6 +61,10 @@ Nevertheless, for both scenarios, the impact on the infra itself could be better
 
 Since DB operations are most likely the most time consuming ones in this application, it is possible to consider using a cache instead of writing/reading directly to/from the DB, this could help to speed things up, and if persistence is needed the cache could be written to the DB after a predefined timeframe (depending on the use case and the load of the application this could be a few seconds or even minutes/hours).
 
+Useful links: 
+- [Monitoring WebSocket API execution with CloudWatch metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-logging.html)
+- [Throttling a WebSocket API](https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-protect.html)
+
 ### Security
 The websocket endpoint in this API is public and could be invoked by anyone. In order to use it in production it would be wise to implement an [authorizer function](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-access-control.html). This should be done for two reasons: blocking non-users from using the application and also to block a client from impersonating others.
 
